@@ -8,7 +8,7 @@ const PRIVATE_KEY = process.env.REACT_APP_GOOGLE_SERVICE_PRIVATE_KEY;
 
 const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
 
-export const readSpreadsheet = async () => {
+export const readSpreadsheet = async (SHEET_ID) => {
   try {
     await doc.useServiceAccountAuth({
       client_email: CLIENT_EMAIL,
@@ -19,8 +19,24 @@ export const readSpreadsheet = async () => {
 
     const sheet = doc.sheetsById[SHEET_ID];
     const rows = await sheet.getRows();
+
     return rows;
   } catch (e) {
     console.error('Error: ', e);
   }
 };
+
+export const getSpreadsheets = async () => {
+    try {
+      await doc.useServiceAccountAuth({
+        client_email: CLIENT_EMAIL,
+        private_key: PRIVATE_KEY,
+      });
+      // loads document properties and worksheets
+      await doc.loadInfo();
+  
+      return doc.sheetsByIndex;
+    } catch (e) {
+      console.error('Error: ', e);
+    }
+  };

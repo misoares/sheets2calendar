@@ -5,7 +5,7 @@ import {Calendar, dateFnsLocalizer} from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 import './App.css';
-import {readSpreadsheet} from './Sheets';
+import {getSpreadsheets, readSpreadsheet} from './Sheets';
 
 
 
@@ -39,6 +39,10 @@ function parseRowData(rowData){
     frUntil: rowData['fr-until'],
     frBreak: rowData['fr-break'],
     frH: rowData['fr-h'],
+    saFrom: rowData['sa-from'],
+    saUntil: rowData['sa-until'],
+    saBreak: rowData['sa-break'],
+    saH: rowData['sa-h'],
   }
 }
 
@@ -71,6 +75,7 @@ const MyCalendar = props => (
       localizer={localizer}
       events={props.events}
       defaultView={'week'}
+      
       startAccessor="start"
       endAccessor="end"
       style={{ height: 1200 }}
@@ -105,9 +110,17 @@ function row2event(firstDayWeek, row){
 
 function App() {
   const [rows, setRows] = useState([]);
+  const [sheets, setSheets] = useState([]);
+
+  const [sheet, setSheet] = useState();
   
   useEffect(() => {
-    readSpreadsheet().then(rows=>setRows(rows));
+
+    sheet && readSpreadsheet(sheet).then(rows=>setRows(rows));
+  }, [sheet])
+
+  useEffect(() => {
+    getSpreadsheets().then(sheets=>setSheets(sheets));
   }, [])
 
   const firstDayWeek = startOfWeek(new Date());
@@ -115,8 +128,10 @@ function App() {
 
   return (
     <div className="App">
+      <select onChange={(e=>setSheet(e.target.value))}>
+        {sheets.map(sheet=><option value={sheet._rawProperties.sheetId}>{sheet._rawProperties.title}</option>)}
+      </select>
       <MyCalendar events={events}/>
-        {rows.map((row, idx)=><Row key={idx} row={row}/>)}
     </div>
   );
 }
